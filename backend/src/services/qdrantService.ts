@@ -29,6 +29,9 @@ export async function ensureCollection(): Promise<void> {
                 }
             });
             console.log(`Created Qdrant collection: ${collectionName} with size ${dimSize}`);
+
+            // Wait a moment for Qdrant to fully initialize the collection before upserting
+            await new Promise(resolve => setTimeout(resolve, 2000));
         }
     } catch (error) {
         console.error('Error connecting to Qdrant or ensuring collection:', error);
