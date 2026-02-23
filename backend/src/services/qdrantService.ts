@@ -1,5 +1,6 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { getSetting } from '../db/database';
+import { getEmbedding } from './embeddingService';
 
 let qdrantClient: QdrantClient | null = null;
 
@@ -20,13 +21,19 @@ export async function ensureCollection(): Promise<void> {
         const exists = res.collections.some(c => c.name === collectionName);
 
         if (!exists) {
+            console.log('Detecting vector size from embedding model...');
+            // Fetch a small embedding to determine the size dynamically
+            const dummyVector = await getEmbedding('test');
+            const dimSize = dummyVector.length;
+            console.log(`Detected vector size: ${dimSize}`);
+
             await client.createCollection(collectionName, {
                 vectors: {
-                    size: 3584, // qwen3-embedding:4b output dimension (need to verify this, but Qwen models are often 3584 or 4096. Assuming 3584, will handle dynamically if possible or configure)
+                    size: dimSize,
                     distance: 'Cosine'
                 }
             });
-            console.log(`Created Qdrant collection: ${collectionName}`);
+            console.log(`Created Qdrant collection: ${collectionName} with size ${dimSize}`);
         }
     } catch (error) {
         console.error('Error connecting to Qdrant or ensuring collection:', error);
