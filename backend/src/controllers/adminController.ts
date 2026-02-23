@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getDb, getSetting, setSetting } from '../db/database';
 import { processCsvImport, reindexAll } from '../services/importService';
+import { ensureCollection } from '../services/qdrantService';
 import fs from 'fs';
 
 export const importCsv = async (req: Request, res: Response) => {
@@ -8,6 +9,9 @@ export const importCsv = async (req: Request, res: Response) => {
         if (!req.file) {
             return res.status(400).json({ status: 'error', message: 'No file uploaded' });
         }
+
+        // Ensure collection exists and matches dimension before starting
+        await ensureCollection();
 
         // Process async to avoid blocking response for huge files
         // But for simplicity/demo, we block and return count
