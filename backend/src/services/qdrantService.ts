@@ -2,14 +2,9 @@ import { QdrantClient } from '@qdrant/js-client-rest';
 import { getSetting } from '../db/database';
 import { getEmbedding } from './embeddingService';
 
-let qdrantClient: QdrantClient | null = null;
-
 export function getQdrantClient(): QdrantClient {
-    if (!qdrantClient) {
-        const url = getSetting('qdrant_url') || 'http://localhost:6333';
-        qdrantClient = new QdrantClient({ url });
-    }
-    return qdrantClient;
+    const url = getSetting('qdrant_url') || 'http://localhost:6333';
+    return new QdrantClient({ url });
 }
 
 export async function ensureCollection(): Promise<void> {
