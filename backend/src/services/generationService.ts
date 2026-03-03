@@ -16,6 +16,8 @@ export async function generateText(prompt: string, context?: string): Promise<st
             model,
             prompt: fullPrompt,
             stream: false
+        }, {
+            timeout: 1800000 // 30 mins timeout for slow LLM responses
         });
 
         return response.data.response;

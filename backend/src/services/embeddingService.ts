@@ -9,6 +9,8 @@ export async function getEmbedding(text: string): Promise<number[]> {
         const response = await axios.post(`${url}/api/embeddings`, {
             model,
             prompt: text
+        }, {
+            timeout: 1800000 // 30 mins timeout for slow embedding generation
         });
 
         return response.data.embedding; // Ollama API returns embedding field

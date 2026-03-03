@@ -4,7 +4,7 @@ import router from '../router';
 
 const api = axios.create({
     baseURL: '/api', // Proxied to localhost:3000 by Vite
-    timeout: 60000,   // High timeout for LLM generation responses
+    timeout: 1800000,   // Increased to 30 minutes for large CSV imports and LLM generation
 });
 
 api.interceptors.request.use((config) => {
