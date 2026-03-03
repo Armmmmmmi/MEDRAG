@@ -1,6 +1,6 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { getSetting } from '../db/database';
-import { getEmbedding } from './embeddingService';
+// import { getEmbedding } from './embeddingService'; // No longer needed as dimension is fixed
 
 export function getQdrantClient(): QdrantClient {
     const url = getSetting('qdrant_url') || 'http://localhost:6333';
@@ -16,11 +16,9 @@ export async function ensureCollection(): Promise<void> {
         const exists = res.collections.some(c => c.name === collectionName);
 
         if (!exists) {
-            console.log('Detecting vector size from embedding model...');
-            // Fetch a small embedding to determine the size dynamically
-            const dummyVector = await getEmbedding('test');
-            const dimSize = dummyVector.length;
-            console.log(`Detected vector size: ${dimSize}`);
+            console.log('Using fixed vector size of 2560...');
+            const dimSize = 2560; // Hardcoded dimension
+            console.log(`Configuring Qdrant collection with vector size: ${dimSize}`);
 
             await client.createCollection(collectionName, {
                 vectors: {
