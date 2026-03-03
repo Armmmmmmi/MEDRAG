@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import api from '../services/api'
 import { useI18n } from 'vue-i18n'
+import DrugAutocomplete from '../components/DrugAutocomplete.vue'
 
 const { t } = useI18n()
 const drugA = ref('')
@@ -59,7 +60,7 @@ const clear = () => {
 <template>
   <div class="space-y-8">
     <div>
-      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+      <h2 class="text-2xl font-bold leading-normal text-gray-900 sm:text-3xl sm:tracking-tight">
         {{ t('single.title') }}
       </h2>
       <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
@@ -73,12 +74,9 @@ const clear = () => {
           <div>
             <label for="drugA" class="block text-sm font-medium leading-6 text-gray-900">{{ t('single.drugA') }}</label>
             <div class="mt-2">
-              <input
+              <DrugAutocomplete
                 v-model="drugA"
-                type="text"
-                name="drugA"
                 id="drugA"
-                class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                 :placeholder="t('single.drugA_placeholder')"
                 :disabled="loading"
               />
@@ -87,12 +85,9 @@ const clear = () => {
           <div>
             <label for="drugB" class="block text-sm font-medium leading-6 text-gray-900">{{ t('single.drugB') }}</label>
             <div class="mt-2">
-              <input
+              <DrugAutocomplete
                 v-model="drugB"
-                type="text"
-                name="drugB"
                 id="drugB"
-                class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                 :placeholder="t('single.drugB_placeholder')"
                 :disabled="loading"
               />
@@ -117,7 +112,7 @@ const clear = () => {
           <button
             type="submit"
             :disabled="loading"
-            class="inline-flex justify-center rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="inline-flex justify-center rounded-md bg-teal-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <svg v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -143,15 +138,15 @@ const clear = () => {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         <!-- LLM Response -->
-        <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden">
-          <div class="bg-blue-50 px-6 py-4 border-b border-blue-100 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-blue-900 flex items-center">
-              <svg class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white rounded-xl border border-teal-100 shadow-sm overflow-hidden">
+          <div class="bg-teal-50 px-6 py-4 border-b border-teal-100 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-teal-900 flex items-center">
+              <svg class="h-5 w-5 mr-2 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {{ t('single.report') }}
             </h3>
-            <span class="inline-flex items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+            <span class="inline-flex items-center rounded-md bg-teal-100 px-2.5 py-0.5 text-xs font-semibold text-teal-800">
               AI Generated
             </span>
           </div>
@@ -195,6 +190,11 @@ const clear = () => {
         </div>
 
       </div>
+    </div>
+
+    <!-- AI Disclaimer -->
+    <div class="mt-8 text-center text-xs text-gray-400">
+      <p>{{ t('common.ai_disclaimer') }}</p>
     </div>
   </div>
 </template>

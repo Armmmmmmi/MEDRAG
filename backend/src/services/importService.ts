@@ -5,7 +5,7 @@ import { getEmbedding } from './embeddingService';
 import { upsertVectors } from './qdrantService';
 import fs from 'fs';
 
-export async function processCsvImport(filePath: string): Promise<number> {
+export async function processCsvImport(filePath: string, skipEmbedding: boolean = false): Promise<number> {
     const db = getDb();
     let count = 0;
 
@@ -72,22 +72,24 @@ export async function processCsvImport(filePath: string): Promise<number> {
 
         transaction(batch);
 
-        // Generate embeddings and push to Qdrant
-        const vectorPoints = [];
-        for (const record of batch) {
-            const queryText = `${record.drugA.toLowerCase()} and ${record.drugB.toLowerCase()} interaction severity effect mechanism management`;
-            const vector = await getEmbedding(queryText);
-            vectorPoints.push({
-                id: record.id,
-                vector,
-                payload: record
-            });
+        // Generate embeddings and push to Qdrant if not skipping
+        if (!skipEmbedding) {
+            const vectorPoints = [];
+            for (const record of batch) {
+                const queryText = `${record.drugA.toLowerCase()} and ${record.drugB.toLowerCase()} interaction severity effect mechanism management`;
+                const vector = await getEmbedding(queryText);
+                vectorPoints.push({
+                    id: record.id,
+                    vector,
+                    payload: record
+                });
+            }
+
+            await upsertVectors(vectorPoints);
         }
 
-        await upsertVectors(vectorPoints);
-
         count += batch.length;
-        console.log(`Processed ${count} / ${records.length} records...`);
+        console.log(`Processed ${count} / ${records.length} records... (skipEmbedding: ${skipEmbedding})`);
     }
 
     // Clean up

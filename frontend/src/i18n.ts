@@ -7,6 +7,7 @@ const messages = {
             multi: 'Multi Drug Check',
             patient: 'Patient Mode',
             qa: 'Literature Q&A',
+            history: 'Query History',
             admin: 'Admin Panel'
         },
         common: {
@@ -14,7 +15,8 @@ const messages = {
             clear: 'Clear',
             screening: 'Screening...',
             error: 'Error',
-            none: 'None'
+            none: 'None',
+            ai_disclaimer: 'MEDRAG is an AI and may make mistakes. Please use your discretion in considering the information before use.'
         },
         single: {
             title: 'Single Pair Data',
@@ -64,6 +66,27 @@ const messages = {
             sources: 'Sources Used',
             sourceInfo: 'Source'
         },
+        history: {
+            title: 'Query History & Review',
+            desc: 'Review historical usage of the Q&A and Drug Interaction system.',
+            search: 'Search',
+            search_placeholder: 'Search drug name or question...',
+            type: 'Type',
+            type_all: 'All',
+            type_single: 'Single Check',
+            type_multi: 'Multi Check',
+            type_qa: 'Q&A',
+            start_date: 'Start Date',
+            end_date: 'End Date',
+            refresh: 'Refresh',
+            col_type: 'Type',
+            col_query: 'Query / Drug',
+            col_score: 'Match Score',
+            col_time: 'Time',
+            col_detail_query: 'Query Input (JSON)',
+            col_detail_result: 'Query Result',
+            empty: 'No history records found'
+        },
         admin: {
             title: 'Admin Panel',
             desc: 'Manage system settings, upload new interaction rules, and monitor database health.',
@@ -85,10 +108,14 @@ const messages = {
             export_title: 'Export Data',
             export_sub: 'Download a full JSON backup of the current SQLite database records.',
             export_btn: 'Download JSON Dump',
-            reindex_title: 'Re-index Vectors',
-            reindex_sub: 'Re-generate vector embeddings for all records using the current embedding model.',
-            reindex_btn: 'Force Re-index All',
-            db_title: 'Database Records',
+            reindex_title: 'Re-index Database',
+            reindex_sub: 'Regenerate vector embeddings for all existing database records.',
+            reindex_btn: 'Start Full Re-index',
+            import_wait: 'Uploading and processing CSV (this may take a while as embeddings are generated)...',
+            import_wait_no_embed: 'Uploading to SQLite only (skipping embeddings)...',
+            import_cancelled: 'Import cancelled by user.',
+            import_err: 'Failed to import CSV.',
+            db_title: 'Interaction Database Records',
             refresh: 'Refresh',
             drugA: 'Drug A',
             drugB: 'Drug B',
@@ -102,6 +129,7 @@ const messages = {
             multi: 'ตรวจสอบหลายตัวรับ (Multi)',
             patient: 'ข้อมูลผู้ป่วย (Patient)',
             qa: 'ค้นหาฐานข้อมูล (Q&A)',
+            history: 'ประวัติการค้นหา (History)',
             admin: 'ผู้ดูแลระบบ (Admin)'
         },
         common: {
@@ -109,7 +137,8 @@ const messages = {
             clear: 'ล้างข้อมูล',
             screening: 'กำลังตรวจสอบ...',
             error: 'เกิดข้อผิดพลาด',
-            none: 'ไม่มี'
+            none: 'ไม่มี',
+            ai_disclaimer: 'MEDRAG เป็น AI และอาจทำผิดพลาดได้ โปรดใช้วิจารณญาณในการพิจารณาข้อมูลก่อนนำไปใช้งาน'
         },
         single: {
             title: 'ตรวจสอบยาคู่เดียว (Single Pair)',
@@ -159,6 +188,27 @@ const messages = {
             sources: 'แหล่งข้อมูลอ้างอิง',
             sourceInfo: 'แหล่งที่มา'
         },
+        history: {
+            title: 'ประวัติการตรวจสอบคู่ยาและ Q&A ย้อนหลัง',
+            desc: 'ตรวจสอบประวัติการใช้งานระบบ Q&A และ Drug Interaction',
+            search: 'ค้นหา (Search)',
+            search_placeholder: 'ค้นหาชื่อยา หรือคำถาม...',
+            type: 'ประเภท (Type)',
+            type_all: 'ทั้งหมด (All)',
+            type_single: 'Single Check',
+            type_multi: 'Multi Check',
+            type_qa: 'Q&A',
+            start_date: 'ตั้งแต่ (Start Date)',
+            end_date: 'ถึง (End Date)',
+            refresh: 'รีเฟรช',
+            col_type: 'ประเภท',
+            col_query: 'คำค้นหา / ยา',
+            col_score: 'ความแม่นยำ',
+            col_time: 'เวลา',
+            col_detail_query: 'ข้อมูลการค้นหา (Query Input)',
+            col_detail_result: 'พจตลัพธ์ (Query Result)',
+            empty: 'ไม่พบข้อมูลประวัติ (No history records found)'
+        },
         admin: {
             title: 'แผงควบคุมระบบ (Admin Panel)',
             desc: 'จัดการการตั้งค่า อัปโหลดกฎข้อบังคับใหม่ และตรวจสอบสถานะฐานข้อมูล',
@@ -180,10 +230,14 @@ const messages = {
             export_title: 'ส่งออกข้อมูล',
             export_sub: 'ดาวน์โหลดบันทึกทั้งหมดใน SQLite Database ออกมาเป็นไฟล์ JSON',
             export_btn: 'ดาวน์โหลดข้อมูล (JSON Dump)',
-            reindex_title: 'สร้างดัชนี Vector ใหม่',
-            reindex_sub: 'สร้าง Embedding Vector ใหม่อีกครั้งสำหรับข้อมูลทั้งหมด',
-            reindex_btn: 'บังคับสร้างดัชนีใหม่',
-            db_title: 'ข้อมูลในฐานข้อมูล',
+            reindex_title: 'จัดทำดัชนีฐานข้อมูลใหม่ (Re-index)',
+            reindex_sub: 'สร้าง Vector Embeddings ใหม่สำหรับข้อมูลทั้งหมดที่มีอยู่ในฐานข้อมูล',
+            reindex_btn: 'เริ่มทำดัชนีใหม่ทั้งหมด (Start Full Re-index)',
+            import_wait: 'กำลังอัปโหลดและประมวลผล CSV (อาจใช้เวลาสักครู่ในการสร้าง Embeddings)...',
+            import_wait_no_embed: 'กำลังบันทึกข้อมูลลง SQLite อย่างเดียว (ข้ามการสร้าง Embeddings)...',
+            import_cancelled: 'ยกเลิกการนำเข้าแล้ว',
+            import_err: 'นำเข้าข้อมูล CSV ไม่สำเร็จ',
+            db_title: 'ฐานข้อมูลปฏิกิริยาระหว่างยา (Interaction Database)',
             refresh: 'รีเฟรช',
             drugA: 'ยา A',
             drugB: 'ยา B',

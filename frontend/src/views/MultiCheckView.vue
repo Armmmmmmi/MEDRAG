@@ -2,11 +2,32 @@
 import { ref } from 'vue'
 import api from '../services/api'
 import { useI18n } from 'vue-i18n'
+import DrugAutocomplete from '../components/DrugAutocomplete.vue'
 
 const { t } = useI18n()
-const inputText = ref('')
+const selectedDrugs = ref<string[]>([])
+const currentDrug = ref('')
 const loading = ref(false)
 const error = ref('')
+
+const addDrug = (drugName: string) => {
+  const name = drugName.trim()
+  if (name && !selectedDrugs.value.includes(name)) {
+    selectedDrugs.value.push(name)
+  }
+  currentDrug.value = ''
+}
+
+const removeDrug = (index: number) => {
+  selectedDrugs.value.splice(index, 1)
+}
+
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    addDrug(currentDrug.value)
+  }
+}
 
 const result = ref<{
   normalizedDrugs: string[],
@@ -19,8 +40,8 @@ const result = ref<{
 } | null>(null)
 
 const checkInteractions = async () => {
-  if (!inputText.value.trim()) {
-    error.value = 'Please enter a list of medications.'
+  if (selectedDrugs.value.length < 2) {
+    error.value = 'Please add at least two medications to compare.'
     return
   }
 
@@ -30,7 +51,7 @@ const checkInteractions = async () => {
 
   try {
     const response = await api.post('/interaction/multi', {
-      text: inputText.value
+      text: selectedDrugs.value.join(', ')
     })
 
     if (response.data.status === 'success') {
@@ -55,7 +76,8 @@ const checkInteractions = async () => {
 }
 
 const clear = () => {
-  inputText.value = ''
+  selectedDrugs.value = []
+  currentDrug.value = ''
   result.value = null
   error.value = ''
 }
@@ -64,7 +86,7 @@ const clear = () => {
 <template>
   <div class="space-y-8">
     <div>
-      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+      <h2 class="text-2xl font-bold leading-normal text-gray-900 sm:text-3xl sm:tracking-tight">
         {{ t('multi.title') }}
       </h2>
       <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
@@ -76,19 +98,40 @@ const clear = () => {
     <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 shadow-sm">
       <form @submit.prevent="checkInteractions" class="space-y-6">
         <div>
-          <label for="medications" class="block text-sm font-medium leading-6 text-gray-900">{{ t('multi.input_label') }}</label>
+          <label class="block text-sm font-medium leading-6 text-gray-900 mb-2">{{ t('multi.input_label') }}</label>
+          
+          <!-- Selected Drugs Chips -->
+          <div v-if="selectedDrugs.length > 0" class="flex flex-wrap gap-2 mb-3">
+            <span 
+              v-for="(drug, index) in selectedDrugs" 
+              :key="index"
+              class="inline-flex items-center rounded-md bg-teal-50 px-2 py-1 text-sm font-medium text-teal-700 ring-1 ring-inset ring-teal-700/10"
+            >
+              {{ drug }}
+              <button 
+                type="button" 
+                class="ml-1 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-teal-400 hover:bg-teal-200 hover:text-teal-600 focus:bg-teal-500 focus:text-white focus:outline-none"
+                @click="removeDrug(index)"
+              >
+                <span class="sr-only">Remove drug</span>
+                <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+                  <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
+                </svg>
+              </button>
+            </span>
+          </div>
+
           <div class="mt-2">
-            <textarea
-              v-model="inputText"
+            <DrugAutocomplete
+              v-model="currentDrug"
               id="medications"
-              name="medications"
-              rows="4"
-              class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
               :placeholder="t('multi.input_placeholder')"
               :disabled="loading"
-            ></textarea>
+              @select="addDrug"
+              @keydown="handleKeydown"
+            />
           </div>
-          <p class="mt-2 text-sm text-gray-500" v-if="loading">{{ t('multi.wait') }}</p>
+          <p class="mt-2 text-sm text-gray-500">{{ t('multi.wait') }}</p>
         </div>
 
         <div v-if="error" class="rounded-md bg-red-50 p-4">
@@ -108,7 +151,7 @@ const clear = () => {
           <button
             type="submit"
             :disabled="loading"
-            class="inline-flex justify-center rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="inline-flex justify-center rounded-md bg-teal-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <svg v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -136,7 +179,7 @@ const clear = () => {
         <span 
           v-for="drug in result.normalizedDrugs" 
           :key="drug"
-          class="inline-flex items-center rounded-md bg-white px-3 py-1 text-sm font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 shadow-sm"
+          class="inline-flex items-center rounded-md bg-white px-3 py-1 text-sm font-medium text-teal-700 ring-1 ring-inset ring-teal-700/10 shadow-sm"
         >
           {{ drug }}
         </span>
@@ -151,7 +194,7 @@ const clear = () => {
         <!-- Pair Header -->
         <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex items-center gap-3">
-            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-800 font-bold text-sm">
+            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-teal-100 text-teal-800 font-bold text-sm">
               {{ index + 1 }}
             </span>
             <span class="text-lg font-bold text-gray-900 capitalize">{{ item.pair[0] }}</span>
@@ -182,7 +225,7 @@ const clear = () => {
           <!-- LLM Response -->
           <div class="p-6">
             <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center">
-              <svg class="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="h-4 w-4 mr-1 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               {{ t('single.report') }}
@@ -214,6 +257,10 @@ const clear = () => {
 
     </div>
 
+    <!-- AI Disclaimer -->
+    <div class="mt-8 text-center text-xs text-gray-400">
+      <p>{{ t('common.ai_disclaimer') }}</p>
+    </div>
   </div>
 </template>
 

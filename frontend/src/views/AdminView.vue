@@ -2,8 +2,11 @@
 import { ref, onMounted } from 'vue'
 import api from '../services/api'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { authService } from '../services/auth'
 
 const { t } = useI18n()
+const router = useRouter()
 
 // Settings State
 const settings = ref({
@@ -72,30 +75,48 @@ const handleFileUpload = async (e: Event) => {
   }
 
   importing.value = true
-  importMsg.value = { type: 'info', text: 'Uploading and processing CSV (this may take a while as embeddings are generated)...' }
+  importMsg.value = { type: 'info', text: t('admin.import_wait') }
   
   const formData = new FormData()
   formData.append('file', file)
 
-  try {
-    // Increase timeout to 30 minutes for large files
-    const res = await api.post('/admin/import', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 1800000 // 30 mins
-    })
-    
-    if (res.data.status === 'success') {
-      importMsg.value = { type: 'success', text: res.data.message }
-      fetchRecords() // refresh table
-    } else {
-      importMsg.value = { type: 'error', text: res.data.message }
+  const uploadFile = async (skipEmbedding: boolean = false) => {
+    if (skipEmbedding) {
+      formData.append('skipEmbedding', 'true')
     }
-  } catch (e: any) {
-    importMsg.value = { type: 'error', text: e.response?.data?.message || 'Failed to import CSV.' }
-  } finally {
-    importing.value = false
-    if (fileInput.value) fileInput.value.value = ''
+
+    try {
+      const res = await api.post('/admin/import', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 1800000 // 30 mins
+      })
+      
+      if (res.data.status === 'success') {
+        importMsg.value = { type: 'success', text: res.data.message }
+        fetchRecords() // refresh table
+      } else if (res.data.status === 'warning' && res.data.requiresConfirmation) {
+        // Embedding service is down, ask user
+        importing.value = false
+        const proceed = confirm(res.data.message)
+        if (proceed) {
+          importing.value = true
+          importMsg.value = { type: 'info', text: t('admin.import_wait_no_embed') }
+          await uploadFile(true)
+        } else {
+          importMsg.value = { type: 'info', text: t('admin.import_cancelled') }
+        }
+      } else {
+        importMsg.value = { type: 'error', text: res.data.message }
+      }
+    } catch (e: any) {
+      importMsg.value = { type: 'error', text: e.response?.data?.message || t('admin.import_err') }
+    } finally {
+      importing.value = false
+      if (fileInput.value) fileInput.value.value = ''
+    }
   }
+
+  await uploadFile()
 }
 
 const triggerExport = () => {
@@ -154,17 +175,33 @@ onMounted(() => {
   fetchSettings()
   fetchRecords()
 })
+
+const handleLogout = () => {
+  authService.logout()
+  router.push('/login')
+}
 </script>
 
 <template>
   <div class="space-y-10">
-    <div>
-      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-        {{ t('admin.title') }}
-      </h2>
-      <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
-        {{ t('admin.desc') }}
-      </p>
+    <div class="flex justify-between items-start">
+      <div>
+        <h2 class="text-2xl font-bold leading-normal text-gray-900 sm:text-3xl sm:tracking-tight">
+          {{ t('admin.title') }}
+        </h2>
+        <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
+          {{ t('admin.desc') }}
+        </p>
+      </div>
+      <button 
+        @click="handleLogout" 
+        class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+      >
+        <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Logout
+      </button>
     </div>
 
     <!-- Settings Section -->
@@ -242,19 +279,19 @@ onMounted(() => {
         <button 
           @click="fileInput?.click()" 
           :disabled="importing"
-          class="w-full flex justify-center items-center rounded-md bg-blue-50 px-3 py-6 text-sm font-semibold text-blue-700 shadow-sm border-2 border-dashed border-blue-200 hover:border-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
+          class="w-full flex justify-center items-center rounded-md bg-teal-50 px-3 py-6 text-sm font-semibold text-teal-700 shadow-sm border-2 border-dashed border-teal-200 hover:border-teal-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
         >
-          <svg v-if="importing" class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg v-if="importing" class="animate-spin -ml-1 mr-3 h-5 w-5 text-teal-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <svg v-else class="h-6 w-6 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-else class="h-6 w-6 mr-3 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
           </svg>
           {{ importing ? t('common.screening') : t('admin.import_btn') }}
         </button>
 
-        <div v-if="importMsg.text" class="mt-4 text-sm" :class="importMsg.type === 'error' ? 'text-red-600' : (importMsg.type==='success' ? 'text-green-600' : 'text-blue-600')">
+        <div v-if="importMsg.text" class="mt-4 text-sm" :class="importMsg.type === 'error' ? 'text-red-600' : (importMsg.type==='success' ? 'text-green-600' : 'text-teal-600')">
           {{ importMsg.text }}
         </div>
       </div>
@@ -275,7 +312,7 @@ onMounted(() => {
           <button @click="runReindex" :disabled="reindexing" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-red-300 hover:bg-red-50 disabled:opacity-50">
             {{ t('admin.reindex_btn') }}
           </button>
-          <div v-if="reindexMsg.text" class="mt-2 text-sm" :class="reindexMsg.type === 'error' ? 'text-red-600' : 'text-blue-600'">
+          <div v-if="reindexMsg.text" class="mt-2 text-sm" :class="reindexMsg.type === 'error' ? 'text-red-600' : 'text-teal-600'">
             {{ reindexMsg.text }}
           </div>
         </div>
@@ -287,7 +324,7 @@ onMounted(() => {
     <section class="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl overflow-hidden">
       <div class="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
         <h3 class="text-base font-semibold leading-6 text-gray-900">{{ t('admin.db_title') }} ({{ totalRecords }})</h3>
-        <button @click="fetchRecords" class="text-sm font-medium text-blue-600 hover:text-blue-500">{{ t('admin.refresh') }}</button>
+        <button @click="fetchRecords" class="text-sm font-medium text-teal-600 hover:text-teal-500">{{ t('admin.refresh') }}</button>
       </div>
 
       <div class="overflow-x-auto">

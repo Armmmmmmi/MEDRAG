@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { getEmbedding } from '../services/embeddingService';
 import { searchVectors } from '../services/qdrantService';
 import { generateText } from '../services/generationService';
+import { getDb } from '../db/database';
 
 function convertRecordToContext(record: any): string {
     if (!record) return '';
@@ -62,6 +63,22 @@ export const ragQA = async (req: Request, res: Response) => {
         const fullPrompt = `${SYSTEM_PROMPT_QA}\n\nคำถาม:\n${question}`;
 
         const answer = await generateText(fullPrompt, combinedContext);
+
+        // Log history
+        try {
+            const db = getDb();
+            db.prepare(`
+                INSERT INTO query_history (query_type, query_input, query_result, similarity_score)
+                VALUES (?, ?, ?, ?)
+            `).run(
+                'qa',
+                JSON.stringify({ question }),
+                JSON.stringify({ answer, contexts }),
+                contexts.length > 0 ? contexts[0].score : 0
+            );
+        } catch (logErr) {
+            console.error('Failed to log query history:', logErr);
+        }
 
         return res.json({
             status: 'success',

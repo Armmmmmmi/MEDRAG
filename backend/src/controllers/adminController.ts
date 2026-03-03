@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { getDb, getSetting, setSetting } from '../db/database';
 import { processCsvImport, reindexAll } from '../services/importService';
 import { ensureCollection } from '../services/qdrantService';
+import { getEmbedding } from '../services/embeddingService';
 import fs from 'fs';
 
 export const importCsv = async (req: Request, res: Response) => {
@@ -10,12 +11,32 @@ export const importCsv = async (req: Request, res: Response) => {
             return res.status(400).json({ status: 'error', message: 'No file uploaded' });
         }
 
-        // Ensure collection exists and matches dimension before starting
-        await ensureCollection();
+        const skipEmbedding = req.body.skipEmbedding === 'true';
+
+        if (!skipEmbedding) {
+            // Pre-flight check: Test if embedding service is online
+            try {
+                await getEmbedding('test');
+                // Ensure collection exists and matches dimension before starting
+                await ensureCollection();
+            } catch (embedError: any) {
+                console.warn('Embedding pre-flight check failed:', embedError.message);
+                // Clean up the uploaded file since we're returning early
+                try {
+                    fs.unlinkSync(req.file.path);
+                } catch (e) { /* ignore */ }
+
+                return res.json({
+                    status: 'warning',
+                    requiresConfirmation: true,
+                    message: 'Embedding service is offline or unreachable. Do you want to save the data to SQLite only (skip Qdrant)?'
+                });
+            }
+        }
 
         // Process async to avoid blocking response for huge files
         // But for simplicity/demo, we block and return count
-        const count = await processCsvImport(req.file.path);
+        const count = await processCsvImport(req.file.path, skipEmbedding);
 
         return res.json({
             status: 'success',

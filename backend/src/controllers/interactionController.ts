@@ -86,6 +86,21 @@ export const getSingleInteraction = async (req: Request, res: Response) => {
             rawResponse = await generateText(fullPrompt, contextStr);
         }
 
+        // Log history
+        try {
+            db.prepare(`
+                INSERT INTO query_history (query_type, query_input, query_result, similarity_score)
+                VALUES (?, ?, ?, ?)
+            `).run(
+                'single',
+                JSON.stringify({ drugA, drugB }),
+                JSON.stringify({ rawResponse, contextStr }),
+                similarityScore
+            );
+        } catch (logErr) {
+            console.error('Failed to log query history:', logErr);
+        }
+
         return res.json({
             status: 'success',
             data: {

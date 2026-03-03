@@ -122,7 +122,7 @@ const clear = () => {
 <template>
   <div class="space-y-8">
     <div>
-      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+      <h2 class="text-2xl font-bold leading-normal text-gray-900 sm:text-3xl sm:tracking-tight">
         {{ t('patient.title') }}
       </h2>
       <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
@@ -141,7 +141,7 @@ const clear = () => {
                 type="text"
                 name="hn"
                 id="hn"
-                class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
                 :placeholder="t('patient.hn_placeholder')"
                 :disabled="fetching || checking"
               />
@@ -155,7 +155,7 @@ const clear = () => {
                 type="date"
                 name="date"
                 id="date"
-                class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
                 :disabled="fetching || checking"
               />
             </div>
@@ -179,7 +179,7 @@ const clear = () => {
           <button
             type="submit"
             :disabled="fetching || checking"
-            class="inline-flex justify-center rounded-md bg-white border border-gray-300 px-6 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="inline-flex justify-center rounded-md bg-white border border-gray-300 px-6 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <svg v-if="fetching" class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -208,7 +208,7 @@ const clear = () => {
           <p class="text-sm text-gray-500">{{ t('patient.found_sub') }}</p>
         </div>
         <div class="flex space-x-3">
-          <button @click="toggleAll(true)" class="text-sm font-medium text-blue-600 hover:text-blue-500">{{ t('patient.selectAll') }}</button>
+          <button @click="toggleAll(true)" class="text-sm font-medium text-teal-600 hover:text-teal-500">{{ t('patient.selectAll') }}</button>
           <span class="text-gray-300">|</span>
           <button @click="toggleAll(false)" class="text-sm font-medium text-gray-600 hover:text-gray-500">{{ t('patient.deselectAll') }}</button>
         </div>
@@ -222,7 +222,7 @@ const clear = () => {
                 :id="`drug-${index}`"
                 v-model="drug.selected"
                 type="checkbox"
-                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600"
               />
             </div>
             <div class="ml-3 text-sm leading-6">
@@ -240,7 +240,7 @@ const clear = () => {
         <button
           @click="checkInteractions"
           :disabled="selectedDrugsCount < 2 || checking"
-          class="inline-flex justify-center rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="inline-flex justify-center rounded-md bg-teal-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <svg v-if="checking" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -275,7 +275,7 @@ const clear = () => {
         <!-- Pair Header -->
         <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex items-center gap-3">
-            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-800 font-bold text-sm">
+            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-teal-100 text-teal-800 font-bold text-sm">
               {{ index + 1 }}
             </span>
             <span class="text-lg font-bold text-gray-900 capitalize">{{ item.pair[0] }}</span>
@@ -306,7 +306,7 @@ const clear = () => {
           <!-- LLM Response -->
           <div class="p-6">
             <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center">
-              <svg class="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="h-4 w-4 mr-1 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               {{ t('single.report') }}
@@ -335,9 +335,12 @@ const clear = () => {
           
         </div>
       </div>
-
     </div>
 
+    <!-- AI Disclaimer -->
+    <div class="mt-8 text-center text-xs text-gray-400">
+      <p>{{ t('common.ai_disclaimer') }}</p>
+    </div>
   </div>
 </template>
 

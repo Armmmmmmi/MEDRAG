@@ -83,7 +83,7 @@ onMounted(() => {
   history.value.push({
     id: messageIdCounter++,
     role: 'assistant',
-    content: 'สวัสดีครับ ผมเป็นผู้ช่วยตอบคำถาม (RAG Q&A) จากฐานข้อมูลทางการแพทย์ของ MEDRAGV2\nมีอะไรให้ผมช่วยไหมครับ?'
+    content: 'สวัสดีครับ ผมเป็นผู้ช่วยตอบคำถาม (RAG Q&A) จากฐานข้อมูลทางการแพทย์ของ MEDRAGV\nมีอะไรให้ผมช่วยไหมครับ?'
   })
 })
 </script>
@@ -92,7 +92,7 @@ onMounted(() => {
   <div class="h-full flex flex-col space-y-6">
     <div class="flex justify-between items-center shrink-0">
       <div>
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+        <h2 class="text-2xl font-bold leading-normal text-gray-900 sm:text-3xl sm:tracking-tight">
           {{ t('qa.title') }}
         </h2>
         <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
@@ -120,7 +120,7 @@ onMounted(() => {
           <div 
             class="max-w-[85%] sm:max-w-[75%] rounded-2xl px-5 py-3.5 shadow-sm relative group"
             :class="msg.role === 'user' 
-              ? 'bg-blue-600 text-white rounded-tr-sm' 
+              ? 'bg-teal-600 text-white rounded-tr-sm' 
               : 'bg-white text-gray-800 border border-gray-200 rounded-tl-sm'"
           >
             <div class="prose prose-sm max-w-none whitespace-pre-wrap leading-relaxed font-sans" :class="msg.role === 'user' ? 'text-white' : 'text-gray-800'">
@@ -137,7 +137,7 @@ onMounted(() => {
               </p>
               <div class="space-y-2">
                 <details v-for="(ctx, idx) in msg.contexts" :key="idx" class="group/details">
-                  <summary class="text-xs text-blue-600 font-medium cursor-pointer hover:text-blue-800 select-none list-none flex items-center">
+                  <summary class="text-xs text-teal-600 font-medium cursor-pointer hover:text-teal-800 select-none list-none flex items-center">
                     <svg class="w-3 h-3 mr-1 transition-transform group-open/details:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -184,13 +184,13 @@ onMounted(() => {
             v-model="question"
             type="text"
             :placeholder="t('qa.placeholder')"
-            class="flex-1 rounded-full border-0 py-3 px-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+            class="flex-1 rounded-full border-0 py-3 px-5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
             :disabled="asking"
           />
           <button
             type="submit"
             :disabled="asking || !question.trim()"
-            class="inline-flex items-center justify-center rounded-full bg-blue-600 p-3 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-transform transform active:scale-95"
+            class="inline-flex items-center justify-center rounded-full bg-teal-600 p-3 text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-transform transform active:scale-95"
           >
             <svg class="w-5 h-5 -rotate-90 translate-y-[1px] -translate-x-[1px]" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
@@ -198,7 +198,11 @@ onMounted(() => {
           </button>
         </form>
       </div>
+    </div>
 
+    <!-- AI Disclaimer -->
+    <div class="mt-4 text-center text-xs text-gray-400 shrink-0">
+      <p>{{ t('common.ai_disclaimer') }}</p>
     </div>
   </div>
 </template>

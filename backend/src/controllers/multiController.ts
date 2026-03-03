@@ -139,6 +139,21 @@ export const getMultiInteraction = async (req: Request, res: Response) => {
                 retrievedContext: contextStr,
                 similarityScore
             });
+
+            // Log history
+            try {
+                db.prepare(`
+                    INSERT INTO query_history (query_type, query_input, query_result, similarity_score)
+                    VALUES (?, ?, ?, ?)
+                `).run(
+                    'multi',
+                    JSON.stringify({ drugA, drugB }),
+                    JSON.stringify({ rawResponse, contextStr }),
+                    similarityScore
+                );
+            } catch (logErr) {
+                console.error('Failed to log query history:', logErr);
+            }
         }
 
         return res.json({
